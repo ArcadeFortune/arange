@@ -12,6 +12,7 @@ import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:arange/components/MikanButton.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/src/material/colors.dart' as material;
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
@@ -33,116 +34,112 @@ class _ARangePageState extends State<ARangePage> {
   bool _showTextField = false;
   final TextEditingController _textController = TextEditingController();
 
-
   void _toggleTextField() {
     setState(() {
       _showTextField = !_showTextField;
     });
   }
 
-
   void _logEnteredText() async {
     //if the user entered text
     if (_showTextField && _textController.text.isNotEmpty) {
-        _toggleTextField();
-        await generateImageWithText(_textController.text);
-        await spawnMikan();
-        print('Entered text: ${_textController.text}');
-        _textController.text = '';
+      _toggleTextField();
+      await generateImageWithText(_textController.text);
+      await spawnMikan();
+      print('Entered text: ${_textController.text}');
+      _textController.text = '';
     } else {
       _toggleTextField();
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:    Stack(children: [  
-      ARView(onARViewCreated: _onARViewCreated,),
-      
-      Positioned(
-        bottom: _showTextField ? 90 : 20,
-        right: 20,
-        child: FloatingActionButton(
-          onPressed: () {
-            // spawnMikan();
-            _logEnteredText();
-          },
-          child: const Icon(Icons.add),
+        body: Stack(
+      children: [
+        ARView(
+          onARViewCreated: _onARViewCreated,
         ),
-      ),
-      
-      if (_showTextField) 
-        Expanded(
-          child: Align(
-            alignment: FractionalOffset.bottomCenter,
-            child: Container(
-                // width: 200,
+        Positioned(
+          bottom: _showTextField ? 110 : 20,
+          right: 20,
+          child: FloatingActionButton(
+            onPressed: () {
+              // spawnMikan();
+              _logEnteredText();
+            },
+            child: const Icon(Icons.add),
+          ),
+        ),
+        if (_showTextField)
+          Expanded(
+            child: Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                  color: material.Colors.white,
+                ),
                 padding: const EdgeInsets.all(20),
                 child: TextField(
+                  autofocus: true,
                   controller: _textController,
                   onSubmitted: (String value) {
                     _logEnteredText();
                   },
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Enter text',
+                    labelText: 'Add remark',
                   ),
                 ),
               ),
+            ),
           ),
-        ),
-      ],)  
-        // body: Stack(children: [
-      // if (isInitialized) MikanButton(objectManager)
-
-    );
+      ],
+    ));
   }
 
   Future<void> spawnMikan() async {
     final directory = await getApplicationDocumentsDirectory();
 
-
-    final currentLocation = locationManager.currentLocation;
     print('MikanButton pressed');
     final cameraPose = await sessionManager.getCameraPose();
     final cameraPosition = cameraPose!.getTranslation();
     final cameraRotation = cameraPose.getRotation();
     final cameraForward = cameraRotation.forward;
-    final mikanPosition = Vector3(
+    var mikanPosition = Vector3(
       (cameraPosition.x - cameraForward.x) * 4,
       (cameraPosition.y - cameraForward.y) * 4,
       (cameraPosition.z - cameraForward.z) * 4,
     );
-    //todo: calculate rotation to face the camera
-    final mikanRotation = Vector4(
-      1,
-      0,
-      0,
-      0,
-    );
     await objectManager.addNode(ARNode(
-      // type: NodeType.fileSystemAppFolderGLTF2,
-      // uri: 'd.gltf',
-      // uri: '/data/user/0/com.example.arange/app_flutter/c.gltf',
-      type: NodeType.fileSystemAppFolderGLB,
-      uri: 'girl.glb',
-      scale: Vector3(1, 1, 1),
-      position: mikanPosition,
-      rotation: mikanRotation
-    ));
-    
-    mikanPosition.y = mikanPosition.y - 1;
+        // type: NodeType.fileSystemAppFolderGLTF2,
+        // uri: 'd.gltf',
+        // uri: '/data/user/0/com.example.arange/app_flutter/c.gltf',
+        type: NodeType.fileSystemAppFolderGLB,
+        uri: 'girl.glb',
+        scale: Vector3(1, 1, 1),
+        position: mikanPosition,
+        transformation: cameraPose //transform to look at the camera
+        ));
+
+    mikanPosition.y -= 0.5; 
+    // cameraPose.row0 = Vector4(0.0, 1.0, 0.0, 1.0);
+    // cameraPose.row1 = Vector4(1.0, 0.0, 0.0, 0.0);
+    // cameraPose.row2 = Vector4(0.0, 0.0, -1.0, 0.0);
     await objectManager.addNode(ARNode(
-      type: NodeType.fileSystemAppFolderGLTF2,
-      uri: 'text_cube.gltf',
-      // uri: '/data/user/0/com.example.arange/app_flutter/c.gltf',
-      // type: NodeType.webGLB,
-      // uri:
-      //     'https://cdn.discordapp.com/attachments/1254416954379472946/1257954435376611411/just_a_girl.glb?ex=668648dd&is=6684f75d&hm=68f12325dedc5f0b41577fb5eb16e0a84d87b43c6bec0967a99f70485143bf9f&',
-      scale: Vector3(0.5, 0.5, 0.5),
-      position: mikanPosition,
-      rotation: mikanRotation
-    ));
+        type: NodeType.fileSystemAppFolderGLTF2,
+        uri: 'text_cube.gltf',
+        scale: Vector3(0.5, 0.5, 0.5),
+        position: mikanPosition,
+        transformation: cameraPose//transform to look at the camera
+        ));
+        print(cameraRotation);
+        print(cameraRotation.forward);
     print('Mikan spawned');
   }
 
@@ -160,7 +157,6 @@ class _ARangePageState extends State<ARangePage> {
     //initialize the managers
     await ARSessionManager.onInitialize();
     await ARObjectManager.onInitialize();
-    await locationManager.startLocationUpdates();
 
     await _saveFile('text_cube.bin');
     await _saveFile('text_cube.gltf');
@@ -169,10 +165,10 @@ class _ARangePageState extends State<ARangePage> {
 
     // Get the application's documents directory
     final directory = await getApplicationDocumentsDirectory();
-    
+
     // List the contents of the directory
     final List<FileSystemEntity> contents = directory.listSync();
-    
+
     // Print the contents
     print('Contents of ${directory.path}:');
     for (var entity in contents) {
@@ -180,24 +176,6 @@ class _ARangePageState extends State<ARangePage> {
     }
   }
 }
-  
-
-//   Future<void> _loadMikan() async {
-//     // Get the path to the documents directory
-//     final directory = await getApplicationDocumentsDirectory();
-//     final path = directory.path;
-
-//     // Load the image from assets
-//     final byteData = await rootBundle.load('assets/MikanFinishedWah.glb');
-
-//     // Create a file in the documents directory
-//     final file = File('$path/Mikan.glb');
-
-//     // Write the image data to the file
-//     await file.writeAsBytes(byteData.buffer.asUint8List());
-
-//     print('Mikan saved to ${file.path}');
-//   }
 
 //function to save a file from the rootbundle to the app directory
 Future<void> _saveFile(String fileName) async {
@@ -217,8 +195,6 @@ Future<void> _saveFile(String fileName) async {
   print('File saved to ${file.path}');
 }
 
-
-
 Future<void> generateImageWithText(String text) async {
   // Create a new image with desired dimensions
   final img.Image image = img.Image(width: 600, height: 200);
@@ -232,7 +208,8 @@ Future<void> generateImageWithText(String text) async {
 
   // Draw the text on the image
   // img.drawString(image, text, font: font, x: 20, y: 80, color: img.ColorRgb8(255, 0, 0));
-  img.drawString(image, text, font: font, x: 20, y: 20, color: img.ColorRgb8(255, 255, 255));
+  img.drawString(image, text,
+      font: font, x: 20, y: 20, color: img.ColorRgb8(255, 255, 255));
 
   // Convert the image to PNG format
   final Uint8List pngBytes = Uint8List.fromList(img.encodePng(image));
