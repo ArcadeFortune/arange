@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:image/image.dart';
@@ -7,6 +6,13 @@ import 'package:path_provider/path_provider.dart';
 
 class ArangeService {
   ArangeService();
+
+  Future<void> load() async {
+    await _saveAssets('text_cube.bin');
+    await _saveAssets('text_cube.gltf');
+    await _saveAssets('mikan.glb');
+    await create3dText('Watch: Date A Live');
+  }
 
   Future<void> create3dText(String text) async {
     // Create a new image with desired dimensions
@@ -35,14 +41,6 @@ class ArangeService {
 
     print('Image saved to $path');
   }
-
-  Future<void> load() async {
-    await _saveAssets('text_cube.bin');
-    await _saveAssets('text_cube.gltf');
-    await _saveAssets('girl.glb');
-    await create3dText('Watch: Date A Live');
-  }
-
   
   //function to save a file from the rootbundle to the app directory
   Future<void> _saveAssets(String fileName) async {

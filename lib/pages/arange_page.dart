@@ -1,21 +1,13 @@
-import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
-
 import 'package:ar_flutter_plugin_flutterflow/datatypes/node_types.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_anchor_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_location_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_object_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
-import 'package:ar_flutter_plugin_flutterflow/models/ar_hittest_result.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
-import 'package:arange/components/TextPrompt.dart';
+import 'package:arange/components/text_prompt.dart';
 import 'package:arange/provider/arange_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/material/colors.dart' as material;
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -80,8 +72,6 @@ class _ARangePageState extends State<ARangePage> {
   }
 
   Future<void> spawnMikan() async {
-    final directory = await getApplicationDocumentsDirectory();
-
     print('MikanButton pressed');
     final cameraPose = await sessionManager.getCameraPose();
     final cameraPosition = cameraPose!.getTranslation();
@@ -94,7 +84,7 @@ class _ARangePageState extends State<ARangePage> {
     );
     await objectManager.addNode(ARNode(
         type: NodeType.fileSystemAppFolderGLB,
-        uri: 'girl.glb',
+        uri: 'mikan.glb',
         scale: Vector3(1, 1, 1),
         position: mikanPosition,
         transformation: cameraPose //transform to look at the camera
@@ -126,6 +116,5 @@ class _ARangePageState extends State<ARangePage> {
     //initialize the managers
     await ARSessionManager.onInitialize();
     await ARObjectManager.onInitialize();
-
   }
 }
