@@ -90,7 +90,7 @@ class _ARangePageState extends State<ARangePage> {
         transformation: cameraPose //transform to look at the camera
         ));
 
-    mikanPosition.y -= 0.5;
+    mikanPosition.y -= 0.46;
 
     await objectManager.addNode(ARNode(
         type: NodeType.fileSystemAppFolderGLTF2,
